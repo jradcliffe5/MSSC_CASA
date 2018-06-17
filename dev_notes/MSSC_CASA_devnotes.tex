@@ -1,4 +1,5 @@
-\input{/Users/jackradcliffe/Documents/Latex_style_files/Notes.sty}
+\input{Notes.sty}
+\immediate\write18{my-shell-script.sh > scriptoutput.tex}
 
 \begin{document}
         
@@ -8,18 +9,34 @@
         \maketitle
         \tableofcontents
         
-\section{Introduction}
+\section*{Introduction}
 This is the running notes for the development of the MSSC CASA self calibration technique for use in the CASA VLBI development package. These notes are not intended to be purely documentation for this but is a running blog on the latest developments and issues + tests using MSSC. It will hopefully be helpful to others who may have issues that I have found before. 
 
-\section{Outline}
+\section*{Summary}
 The MSSC code was set out in Radcliffe+16 which released a version for the Parseltongue/AIPS package. This section outlines the most likely steps needed to develop MSSC for use in CASA. 
 
+Initial development (due to thesis writing) has been focused on getting a v1 working. Namely the parts in which CASA does not do. Speed ups such as using the parallelisation have not been implemented but possible paths are outlined here. 
+
+\subsection*{Algorithm Implementation}
 \begin{enumerate}
 	\item Automated imaging of sources
 	\item $uv$ division (not implemented in CASA)
 	\item $uv$ stacking
 	\item Self-calibration
 \end{enumerate}
+
+\subsection*{Current code listings}
+\begin{itemize}
+	\item \texttt{uvdiv.py} - code to uv divide model into the visibilities
+	\item \texttt{MSSC\_CASA.py} - control code
+\end{itemize}
+
+\section{Automated Imaging}
+
+\section{$uv$ Division}
+
+
+
 
 \end{document}
       
