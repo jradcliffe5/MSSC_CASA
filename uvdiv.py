@@ -5,6 +5,7 @@ import shutil
 import stat
 import time
 from math import sqrt
+import numpy.ma as ma
 from taskinit import *
 
 vis = '1252+5634.ms'
@@ -29,6 +30,7 @@ for colname in ['DATA']:
         for j in xrange(0,t.nrows()):
             a = t.getcell(colname, j)
             model = t.getcell('MODEL_DATA',j)
+            model = ma.array(data=model,mask=np.isin(model,0))
             a = a/model
-            t.putcell('CORRECTED_DATA', j, a)
+            t.putcell('CORRECTED_DATA', j, a.filled(0))
 t.close()

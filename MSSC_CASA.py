@@ -4,6 +4,7 @@
 
 ### Imports ###
 import numpy as np
+import numpy.ma as ma
 import sys
 import os
 import shutil
@@ -47,8 +48,13 @@ def uvdiv(vis):
             for j in xrange(0,t.nrows()):
                 a = t.getcell(colname, j)
                 model = t.getcell('MODEL_DATA',j)
+                model_mask = model == 0
+                model = ma.array(data=model,mask=model_mask)
+                #model = ma.array(data=model,mask=np.isin(model,0))
+                ### note that the use of np.isin cannot be used in CASA as it still uses numpy version v.1.11 whereas this came in v1.14
+                ### Had to use old horrible version (see line 51)
                 a = a/model
-                t.putcell('CORRECTED_DATA', j, a)
+                t.putcell('CORRECTED_DATA', j, a.filled(0))
     t.close()
 
 def separate_sources(msfile):
@@ -67,12 +73,14 @@ def separate_sources(msfile):
         t.putcell('NAME', 0, x)
         t.close()
 
-def initial_image(msfile):
+def initial_image(msfile,interactive):
     for i in range(len(msfile)):
         vis = '%s_temp_MSSC%d.ms' % (msfile[i],i)
-        tclean(vis=vis, )
+        ### Need to find the auto cell size input...
+        ## Also need to set it such that the user does this clean manually
+        tclean(vis=vis,)
 ### MSSC steps ###
 ### 1. Generate initial image ###
 #separate_sources(vis)
 #initial_image(vis)
-uvdiv('1252+5634.ms_temp.ms')
+uvdiv('1252+5634.ms_temp_MSSC0.ms')
