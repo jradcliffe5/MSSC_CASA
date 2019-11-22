@@ -17,7 +17,7 @@ from taskinit import *
 ### Inputs ###
 ### TO do: make a input file ###
 
-msfile = ['evn_SRC0.ms','evn_SRC1.ms']
+msfile = ['evn_SRC0.ms','evn_SRC1.ms','evn_SRC2.ms','evn_SRC3.ms','evn_SRC4.ms','evn_SRC5.ms','evn_SRC6.ms']
 chanaverage = 1 # channels
 timeaverage= 0 # seconds
 
@@ -135,6 +135,8 @@ def add_columns(ms):
 ### 1. Generate initial image ###
 #separate_sources(vis)
 #initial_image(vis)
+
+concat_files=[]
 for i, ms in enumerate(msfile):
     add_columns(ms)
     initial_image(msfile=ms,datacolumn='data')
@@ -143,3 +145,10 @@ for i, ms in enumerate(msfile):
     os.system('rm -r MSSC_%s.ms'%i)
     split(vis=ms,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
     adjust_phase_centre('MSSC_%s.ms'%i,[0,1.04])
+    concat_files.append('MSSC_%s.ms'%i)
+
+
+os.system('rm -r MSSC_all.ms')
+concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
+add_columns('MSSC_all.ms')
+initial_image(msfile='MSSC_all.ms',datacolumn='data')
