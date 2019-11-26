@@ -20,12 +20,12 @@ from taskinit import *
 msfile = ['evn_SRC0.ms','evn_SRC1.ms','evn_SRC2.ms','evn_SRC3.ms','evn_SRC4.ms','evn_SRC5.ms','evn_SRC6.ms']
 chanaverage = 1 # channels
 timeaverage= 0 # seconds
-combinespws=[True]
-combinepols=[True]
-solint=['10min']
+combinespws=[True,True]
+combinepols=[True,True]
+solint=['10min','5min']
 
 ## Imaging options
-manual = False
+ncycles = len(solint)
 
 ###
 
@@ -165,7 +165,7 @@ def run_gaincal(vis='MSSC_all.ms',cycle=0,combinespws=[],combinepols=[],solint=[
             gaintype=gaintype,
             combine=combine)
 
-def recast_calsols(vis='',cycle=0):
+def recast_calsols(vis='',cycle=0,killms=True):
     msfiles = []
     gaintables =[]
     spwmap =[]
@@ -181,6 +181,8 @@ def recast_calsols(vis='',cycle=0):
         applycal(vis=vis[i],
                  gaintable=gaintables,
                  spwmap=spwmap)
+        if (killms == True) and (cycle!=0):
+            os.system('rm -r %s_%d.ms*'%(vis[i].split('.ms')[0],cycle-1))
         os.system('rm -r %s_%d.ms*'%(vis[i].split('.ms')[0],cycle))
         split(vis=vis[i],
               outputvis='%s_%d.ms'%(vis[i].split('.ms')[0],cycle))
@@ -188,23 +190,23 @@ def recast_calsols(vis='',cycle=0):
     return msfiles
 
 
+for cycle in range(ncycles):
+    concat_files=[]
+    for i, ms in enumerate(msfile):
+        add_columns(ms)
+        initial_image(msfile=ms,datacolumn='data')
+        uvdiv(ms)
+        initial_image(msfile=ms,datacolumn='corrected')
+        os.system('rm -r MSSC_%s.ms'%i)
+        split(vis=ms,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
+        adjust_phase_centre('MSSC_%s.ms'%i,[0,1.04])
+        concat_files.append('MSSC_%s.ms'%i)
 
-concat_files=[]
-for i, ms in enumerate(msfile):
-    add_columns(ms)
-    initial_image(msfile=ms,datacolumn='data')
-    uvdiv(ms)
-    initial_image(msfile=ms,datacolumn='corrected')
-    os.system('rm -r MSSC_%s.ms'%i)
-    split(vis=ms,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
-    adjust_phase_centre('MSSC_%s.ms'%i,[0,1.04])
-    concat_files.append('MSSC_%s.ms'%i)
 
+    os.system('rm -r MSSC_all.ms')
+    concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
+    add_columns('MSSC_all.ms')
 
-os.system('rm -r MSSC_all.ms')
-concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
-add_columns('MSSC_all.ms')
-
-run_gaincal(vis='MSSC_all.ms',cycle=0,combinespws=combinespws,combinepols=combinepols,solint=solint)
-msfile = recast_calsols(vis=msfile,cycle=0)
+    run_gaincal(vis='MSSC_all.ms',cycle=cycle,combinespws=combinespws,combinepols=combinepols,solint=solint)
+    msfile = recast_calsols(vis=msfile,cycle=cycle,killms=True)
 #initial_image(msfile='MSSC_all.ms',datacolumn='data')
