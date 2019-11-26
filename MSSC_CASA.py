@@ -20,6 +20,9 @@ from taskinit import *
 msfile = ['evn_SRC0.ms','evn_SRC1.ms','evn_SRC2.ms','evn_SRC3.ms','evn_SRC4.ms','evn_SRC5.ms','evn_SRC6.ms']
 chanaverage = 1 # channels
 timeaverage= 0 # seconds
+combinespws=[True]
+combinepols=[True]
+solint=['10min']
 
 ## Imaging options
 manual = False
@@ -131,10 +134,60 @@ def add_columns(ms):
         raise Exception, \
             'Visibility data set not found - please verify the name'
     mycb.close()
-### MSSC steps ###
-### 1. Generate initial image ###
-#separate_sources(vis)
-#initial_image(vis)
+
+def run_gaincal(vis='MSSC_all.ms',cycle=0,combinespws=[],combinepols=[],solint=[]):
+    gaintables=[]
+    spwmap = []
+    for i in range(cycle):
+        if combinespws[i] == True:
+            appendix='combine'
+            spwmap.append(8*[0])
+        else:
+            appendix=''
+            spwmap.append([])
+        gaintables.append('MSSC_%s.p%d'%(appendix,cycle))
+    if combinespws[cycle]==True:
+        combine = 'spw'
+        appendix='combine'
+    else:
+        combine = ''
+        appendix=''
+    if combinepols[cycle]==True:
+        gaintype='T'
+    else:
+        gaintype = 'G'
+    os.system('rm -r MSSC_%s.p%d'%(appendix,cycle))
+    gaincal(vis=vis,
+            caltable='MSSC_%s.p%d'%(appendix,cycle),
+            solint=solint[cycle],
+            minblperant=3,
+            calmode='p',
+            gaintype=gaintype,
+            combine=combine)
+
+def recast_calsols(vis='',cycle=0):
+    msfiles = []
+    gaintables =[]
+    spwmap =[]
+    for i in range(cycle+1):
+        if combinespws[i] == True:
+            appendix='combine'
+            spwmap.append([0])
+        else:
+            appendix=''
+            spwmap.append([])
+        gaintables.append('MSSC_%s.p%d'%(appendix,cycle))
+    for i in range(len(vis)):
+        applycal(vis=vis[i],
+                 gaintable=gaintables,
+                 spwmap=spwmap)
+        os.system('rm -r %s_%d.ms*'%(vis[i].split('.ms')[0],cycle))
+        split(vis=vis[i],
+              outputvis='%s_%d.ms'%(vis[i].split('.ms')[0],cycle))
+        msfiles.append('%s_%d.ms'%(vis[i].split('.ms')[0],cycle))
+    return msfiles
+
+
 
 concat_files=[]
 for i, ms in enumerate(msfile):
@@ -151,4 +204,7 @@ for i, ms in enumerate(msfile):
 os.system('rm -r MSSC_all.ms')
 concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
 add_columns('MSSC_all.ms')
-initial_image(msfile='MSSC_all.ms',datacolumn='data')
+
+run_gaincal(vis='MSSC_all.ms',cycle=0,combinespws=combinespws,combinepols=combinepols,solint=solint)
+msfile = recast_calsols(vis=msfile,cycle=0)
+#initial_image(msfile='MSSC_all.ms',datacolumn='data')
