@@ -1,6 +1,6 @@
-#### MSSC_CASA v0.1 ###
+#### MSSC_CASA v1 ###
 ### If you use MSSC in your work please cite either Radcliffe+16 ##
-### Or the new version which will be in Moldon, Radcliffe et al. +18 ###
+### Or the new version which will be Radcliffe et al. +20 ###
 
 ### Imports ###
 import numpy as np
@@ -17,7 +17,8 @@ from taskinit import *
 ### Inputs ###
 ### TO do: make a input file ###
 
-msfile = ['evn_SRC0.ms','evn_SRC1.ms','evn_SRC2.ms','evn_SRC3.ms','evn_SRC4.ms','evn_SRC5.ms','evn_SRC6.ms']
+msfile = ['VLBA_SRC028.ms','VLBA_SRC039.ms']
+phasecenter= ['J2000 12h36m59.3343s +62d18m32.5688s', '12h36m48.3166s +62d18m32.5758s']
 chanaverage = 1 # channels
 timeaverage= 0 # seconds
 combinespws=[True,True]
@@ -99,6 +100,7 @@ def initial_image(msfile,datacolumn='data',position=''):
            datacolumn=datacolumn,
            imagename='%s_dirty%s'%(msfile,appendix),
            imsize=[2548,2548],
+           phasecenter=position,
            cell='0.001arcsec',
            niter=0)
     threshold = 3.5*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
@@ -194,7 +196,7 @@ for cycle in range(ncycles):
     concat_files=[]
     for i, ms in enumerate(msfile):
         add_columns(ms)
-        initial_image(msfile=ms,datacolumn='data')
+        initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
         uvdiv(ms)
         initial_image(msfile=ms,datacolumn='corrected')
         os.system('rm -r MSSC_%s.ms'%i)
