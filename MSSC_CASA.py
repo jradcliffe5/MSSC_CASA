@@ -17,13 +17,17 @@ from taskinit import *
 ### Inputs ###
 ### TO do: make a input file ###
 
-msfile = ['VLBA_SRC028.ms','VLBA_SRC039.ms']
-phasecenter= ['J2000 12h36m59.3343s +62d18m32.5688s', '12h36m48.3166s +62d18m32.5758s']
+msfile = ['VLBA_SRC028.ms','VLBA_SRC039.ms','VLBA_SRC059.ms','VLBA_SRC030.ms','VLBA_SRC156.ms',\
+          'VLBA_SRC160.ms','VLBA_SRC049.ms','VLBA_SRC005.ms']
+phasecenter= ['J2000 12h36m59.3343s +62d18m32.5688s', 'J2000 12h36m48.3166s +62d18m32.5758s',\
+              'J2000 12h37m46.6708s +62d17m38.5979s', 'J2000 12h37m13.871s +62d18m26.3019s',\
+              'J2000 12h36m44.3877s +62d11m33.171s' , 'J2000 12h37m21.2533s +62d11m29.9646s',\
+              'J2000 12h36m23.5453s +62d16m42.747s' , 'J2000 12h37m01.104s +62d21m09.6222s']
 chanaverage = 1 # channels
 timeaverage= 0 # seconds
-combinespws=[True,True]
-combinepols=[True,True]
-solint=['10min','5min']
+combinespws=[True]
+combinepols=[True]
+solint=['inf']
 
 ## Imaging options
 ncycles = len(solint)
@@ -102,8 +106,9 @@ def initial_image(msfile,datacolumn='data',position=''):
            imsize=[2548,2548],
            phasecenter=position,
            cell='0.001arcsec',
-           niter=0)
-    threshold = 3.5*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
+           niter=0,
+           parallel=True)
+    threshold = 3.0*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
     os.system('rm -r %s_IM%s.*'%(msfile,appendix))
     tclean(vis=msfile,
            deconvolver='clark',
@@ -115,7 +120,8 @@ def initial_image(msfile,datacolumn='data',position=''):
            niter=10000,
            phasecenter=position,
            threshold=threshold,
-           savemodel='modelcolumn')
+           savemodel='modelcolumn',
+           parallel=True)
 
 def adjust_phase_centre(ms,position):
     tb.open('%s/FIELD'%ms,nomodify=False)
@@ -186,7 +192,7 @@ def recast_calsols(vis='',cycle=0,killms=True):
         if (killms == True) and (cycle!=0):
             os.system('rm -r %s_%d.ms*'%(vis[i].split('.ms')[0],cycle-1))
         os.system('rm -r %s_%d.ms*'%(vis[i].split('.ms')[0],cycle))
-        split(vis=vis[i],
+        split(vis=vis[i],keepmms=False,
               outputvis='%s_%d.ms'%(vis[i].split('.ms')[0],cycle))
         msfiles.append('%s_%d.ms'%(vis[i].split('.ms')[0],cycle))
     return msfiles
@@ -200,7 +206,7 @@ for cycle in range(ncycles):
         uvdiv(ms)
         initial_image(msfile=ms,datacolumn='corrected')
         os.system('rm -r MSSC_%s.ms'%i)
-        split(vis=ms,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
+        split(vis=ms,keepmms=False,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
         adjust_phase_centre('MSSC_%s.ms'%i,[0,1.04])
         concat_files.append('MSSC_%s.ms'%i)
 
