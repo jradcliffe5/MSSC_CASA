@@ -17,8 +17,8 @@ from taskinit import *
 ### Inputs ###
 ### TO do: make a input file ###
 
-msfile = ['VLBA_SRC028.ms','VLBA_SRC039.ms','VLBA_SRC059.ms','VLBA_SRC030.ms','VLBA_SRC156.ms',\
-          'VLBA_SRC160.ms','VLBA_SRC049.ms','VLBA_SRC005.ms']
+msfile = ['VLBA_SRC028_sp.ms','VLBA_SRC039_sp.ms','VLBA_SRC059_sp.ms','VLBA_SRC030_sp.ms','VLBA_SRC156_sp.ms',\
+          'VLBA_SRC160_sp.ms','VLBA_SRC049_sp.ms','VLBA_SRC005_sp.ms']
 phasecenter= ['J2000 12h36m59.3343s +62d18m32.5688s', 'J2000 12h36m48.3166s +62d18m32.5758s',\
               'J2000 12h37m46.6708s +62d17m38.5979s', 'J2000 12h37m13.871s +62d18m26.3019s',\
               'J2000 12h36m44.3877s +62d11m33.171s' , 'J2000 12h37m21.2533s +62d11m29.9646s',\
@@ -107,6 +107,7 @@ def initial_image(msfile,datacolumn='data',position=''):
            phasecenter=position,
            cell='0.001arcsec',
            niter=0,
+           pblimit=1e-10,
            parallel=True)
     threshold = 3.0*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
     os.system('rm -r %s_IM%s.*'%(msfile,appendix))
@@ -116,6 +117,7 @@ def initial_image(msfile,datacolumn='data',position=''):
            imsize=[2548,2548],
            datacolumn=datacolumn,
            cell='0.001arcsec',
+           pblimit=1e-10,
            gain=0.05,
            niter=10000,
            phasecenter=position,
@@ -201,6 +203,7 @@ def recast_calsols(vis='',cycle=0,killms=True):
 for cycle in range(ncycles):
     concat_files=[]
     for i, ms in enumerate(msfile):
+        split_ms()
         add_columns(ms)
         initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
         uvdiv(ms)
