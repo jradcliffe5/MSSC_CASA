@@ -182,7 +182,7 @@ def recast_calsols(vis='',cycle=0,killms=True):
     for i in range(cycle+1):
         if combinespws[i] == True:
             appendix='combine'
-            spwmap.append([0])
+            spwmap.append(8*[0])
         else:
             appendix=''
             spwmap.append([])
@@ -203,20 +203,20 @@ def recast_calsols(vis='',cycle=0,killms=True):
 for cycle in range(ncycles):
     concat_files=[]
     for i, ms in enumerate(msfile):
-        split_ms()
-        add_columns(ms)
-        initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
-        uvdiv(ms)
-        initial_image(msfile=ms,datacolumn='corrected')
-        os.system('rm -r MSSC_%s.ms'%i)
-        split(vis=ms,keepmms=False,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
-        adjust_phase_centre('MSSC_%s.ms'%i,[0,1.04])
+        #add_columns(ms)
+        #initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
+        #uvdiv(ms)
+        #initial_image(msfile=ms,datacolumn='corrected')
+        #os.system('rm -r MSSC_%s.ms'%i)
+        #split(vis=ms,keepmms=False,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
+        adjust_phase_centre('MSSC_%s.ms'%i,[3.3019002509042306,1.085464724077968])
         concat_files.append('MSSC_%s.ms'%i)
 
 
     os.system('rm -r MSSC_all.ms')
     concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
     add_columns('MSSC_all.ms')
+    initial_image(msfile='MSSC_all.ms',datacolumn='data')
 
     run_gaincal(vis='MSSC_all.ms',cycle=cycle,combinespws=combinespws,combinepols=combinepols,solint=solint)
     msfile = recast_calsols(vis=msfile,cycle=cycle,killms=True)
