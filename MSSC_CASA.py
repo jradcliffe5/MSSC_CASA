@@ -23,6 +23,8 @@ phasecenter= ['J2000 12h36m59.3343s +62d18m32.5688s', 'J2000 12h36m48.3166s +62d
               'J2000 12h37m46.6708s +62d17m38.5979s', 'J2000 12h37m13.871s +62d18m26.3019s',\
               'J2000 12h36m44.3877s +62d11m33.171s' , 'J2000 12h37m21.2533s +62d11m29.9646s',\
               'J2000 12h36m23.5453s +62d16m42.747s' , 'J2000 12h37m01.104s +62d21m09.6222s']
+msfile=['VLBA_SRC005_sp.ms']
+phasecenter=['J2000 12h37m01.104s +62d21m09.6222s']
 chanaverage = 1 # channels
 timeaverage= 0 # seconds
 combinespws=[True]
@@ -108,8 +110,8 @@ def initial_image(msfile,datacolumn='data',position=''):
            cell='0.001arcsec',
            niter=0,
            pblimit=1e-10,
-           parallel=True)
-    threshold = 3.0*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
+           parallel=False)
+    threshold = 1.5*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
     os.system('rm -r %s_IM%s.*'%(msfile,appendix))
     tclean(vis=msfile,
            deconvolver='clark',
@@ -119,11 +121,11 @@ def initial_image(msfile,datacolumn='data',position=''):
            cell='0.001arcsec',
            pblimit=1e-10,
            gain=0.05,
-           niter=10000,
+           niter=100000,
            phasecenter=position,
            threshold=threshold,
            savemodel='modelcolumn',
-           parallel=True)
+           parallel=False)
 
 def adjust_phase_centre(ms,position):
     tb.open('%s/FIELD'%ms,nomodify=False)
@@ -203,21 +205,22 @@ def recast_calsols(vis='',cycle=0,killms=True):
 for cycle in range(ncycles):
     concat_files=[]
     for i, ms in enumerate(msfile):
-        #add_columns(ms)
-        #initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
-        #uvdiv(ms)
-        #initial_image(msfile=ms,datacolumn='corrected')
+        print('hi')
+        add_columns(ms)
+        initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
+        uvdiv(ms)
+        initial_image(msfile=ms,datacolumn='corrected')
         #os.system('rm -r MSSC_%s.ms'%i)
         #split(vis=ms,keepmms=False,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
-        adjust_phase_centre('MSSC_%s.ms'%i,[3.3019002509042306,1.085464724077968])
-        concat_files.append('MSSC_%s.ms'%i)
+        #adjust_phase_centre('MSSC_%s.ms'%i,[3.3019002509042306,1.085464724077968])
+        #concat_files.append('MSSC_%s.ms'%i)
 
 
-    os.system('rm -r MSSC_all.ms')
-    concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
-    add_columns('MSSC_all.ms')
-    initial_image(msfile='MSSC_all.ms',datacolumn='data')
+    #os.system('rm -r MSSC_all.ms')
+    #concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
+    #add_columns('MSSC_all.ms')
+    #initial_image(msfile='MSSC_all.ms',datacolumn='data')
 
-    run_gaincal(vis='MSSC_all.ms',cycle=cycle,combinespws=combinespws,combinepols=combinepols,solint=solint)
-    msfile = recast_calsols(vis=msfile,cycle=cycle,killms=True)
+    #run_gaincal(vis='MSSC_all.ms',cycle=cycle,combinespws=combinespws,combinepols=combinepols,solint=solint)
+    #msfile = recast_calsols(vis=msfile,cycle=cycle,killms=True)
 #initial_image(msfile='MSSC_all.ms',datacolumn='data')
