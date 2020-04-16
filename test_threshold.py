@@ -11,7 +11,7 @@ from math import sqrt
 from taskinit import *
 
 
-def initial_image(msfile,datacolumn='data',position=''):
+def initial_image(msfile,datacolumn='data',position='',thresh=''):
     ## First one is to get the rms values, we use the fit-half algorithm
     if datacolumn=='corrected':
         appendix = '_uvdiv'
@@ -27,7 +27,7 @@ def initial_image(msfile,datacolumn='data',position=''):
            cell='0.001arcsec',
            niter=0,
            pblimit=1e-10,
-           parallel=True)
+           parallel=False)
     threshold = 1.0*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
     os.system('rm -r %s_IM%s.*'%(msfile,appendix))
     tclean(vis=msfile,
@@ -40,9 +40,10 @@ def initial_image(msfile,datacolumn='data',position=''):
            gain=0.05,
            niter=10000,
            phasecenter=position,
-           threshold=threshold,
+           threshold=thresh,
+           mask='circle[[1274pix, 1274pix], 7pix]',
            savemodel='modelcolumn',
-           parallel=True)
+           parallel=False)
 
 def uvdiv(vis):
     ## Somehow try to parallelise this?
@@ -89,6 +90,6 @@ def uvdiv(vis):
     t.close()
 
 ms='VLBA_SRC005_sp.ms'
-initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
+initial_image(msfile=ms,datacolumn='data',position='J2000 12h37m01.104s +62d21m09.6222s',thresh=1e-5)
 uvdiv(ms)
-initial_image(msfile=ms,datacolumn='corrected')
+initial_image(msfile=ms,datacolumn='corrected',thresh=0.1)
