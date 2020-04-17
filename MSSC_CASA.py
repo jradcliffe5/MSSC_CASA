@@ -30,6 +30,8 @@ timeaverage= 0 # seconds
 combinespws=[True]
 combinepols=[True]
 solint=['inf']
+thresh1 = 1e-5
+thresh2 = 0.1
 
 ## Imaging options
 ncycles = len(solint)
@@ -94,7 +96,7 @@ def separate_sources(msfile):
         t.putcell('NAME', 0, x)
         t.close()
 
-def initial_image(msfile,datacolumn='data',position=''):
+def initial_image(msfile,datacolumn='data',position='',thresh=''):
     ## First one is to get the rms values, we use the fit-half algorithm
     if datacolumn=='corrected':
         appendix = '_uvdiv'
@@ -111,7 +113,7 @@ def initial_image(msfile,datacolumn='data',position=''):
            niter=0,
            pblimit=1e-10,
            parallel=False)
-    threshold = 1.5*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
+    threshold = 1.0*imstat(imagename='%s_dirty%s.image'%(msfile,appendix),algorithm='fit-half')['rms'][0]
     os.system('rm -r %s_IM%s.*'%(msfile,appendix))
     tclean(vis=msfile,
            deconvolver='clark',
@@ -121,9 +123,10 @@ def initial_image(msfile,datacolumn='data',position=''):
            cell='0.001arcsec',
            pblimit=1e-10,
            gain=0.05,
-           niter=100000,
+           niter=10000,
            phasecenter=position,
-           threshold=threshold,
+           threshold=thresh,
+           mask='circle[[1274pix, 1274pix], 7pix]',
            savemodel='modelcolumn',
            parallel=False)
 
@@ -207,9 +210,9 @@ for cycle in range(ncycles):
     for i, ms in enumerate(msfile):
         print('hi')
         add_columns(ms)
-        initial_image(msfile=ms,datacolumn='data',position=phasecenter[i])
+        initial_image(msfile=ms,datacolumn='data',position=phasecenter[i],thresh=thresh1)
         uvdiv(ms)
-        initial_image(msfile=ms,datacolumn='corrected')
+        initial_image(msfile=ms,datacolumn='corrected',thresh=thresh2)
         os.system('rm -r MSSC_%s.ms'%i)
         split(vis=ms,keepmms=False,outputvis='MSSC_%s.ms'%i, width=chanaverage,timebin='%ss'%timeaverage)
         adjust_phase_centre('MSSC_%s.ms'%i,[3.3019002509042306,1.085464724077968])
@@ -219,8 +222,8 @@ for cycle in range(ncycles):
     os.system('rm -r MSSC_all.ms')
     concat(vis=concat_files,concatvis='MSSC_all.ms',respectname=False)
     add_columns('MSSC_all.ms')
-    initial_image(msfile='MSSC_all.ms',datacolumn='data')
+    #initial_image(msfile='MSSC_all.ms',datacolumn='data')
 
-    run_gaincal(vis='MSSC_all.ms',cycle=cycle,combinespws=combinespws,combinepols=combinepols,solint=solint)
-    msfile = recast_calsols(vis=msfile,cycle=cycle,killms=True)
+    #run_gaincal(vis='MSSC_all.ms',cycle=cycle,combinespws=combinespws,combinepols=combinepols,solint=solint)
+    #msfile = recast_calsols(vis=msfile,cycle=cycle,killms=True)
 initial_image(msfile='MSSC_all.ms',datacolumn='data')
