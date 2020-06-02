@@ -23,15 +23,15 @@ phasecenter= ['J2000 12h36m59.3343s +62d18m32.5688s', 'J2000 12h36m48.3166s +62d
               'J2000 12h37m46.6708s +62d17m38.5979s', 'J2000 12h37m13.871s +62d18m26.3019s',\
               'J2000 12h36m44.3877s +62d11m33.171s' , 'J2000 12h37m21.2533s +62d11m29.9646s',\
               'J2000 12h36m23.5453s +62d16m42.747s' , 'J2000 12h37m01.104s +62d21m09.6222s']
-msfile=['VLBA_SRC005_sp.ms']
-phasecenter=['J2000 12h37m01.104s +62d21m09.6222s']
+#msfile=['VLBA_SRC005_sp.ms']
+#phasecenter=['J2000 12h37m01.104s +62d21m09.6222s']
 chanaverage = 1 # channels
 timeaverage= 0 # seconds
 combinespws=[True]
 combinepols=[True]
 solint=['inf']
 thresh1 = 1e-5
-thresh2 = 0.1
+thresh2 = 0.5
 
 ## Imaging options
 ncycles = len(solint)
@@ -226,4 +226,4 @@ for cycle in range(ncycles):
 
     #run_gaincal(vis='MSSC_all.ms',cycle=cycle,combinespws=combinespws,combinepols=combinepols,solint=solint)
     #msfile = recast_calsols(vis=msfile,cycle=cycle,killms=True)
-initial_image(msfile='MSSC_all.ms',datacolumn='data')
+#initial_image(msfile='MSSC_all.ms',datacolumn='data')
