@@ -17,12 +17,19 @@ from taskinit import *
 ### Inputs ###
 ### TO do: make a input file ###
 
-msfile = ['VLBA_SRC028_sp.ms','VLBA_SRC039_sp.ms','VLBA_SRC059_sp.ms','VLBA_SRC030_sp.ms','VLBA_SRC156_sp.ms',\
-          'VLBA_SRC160_sp.ms','VLBA_SRC049_sp.ms','VLBA_SRC005_sp.ms']
+msfile = ['VLBA_SRC028_sp.ms','VLBA_SRC039_sp.ms',\
+          'VLBA_SRC059_sp.ms','VLBA_SRC030_sp.ms',\
+          'VLBA_SRC156_sp.ms','VLBA_SRC160_sp.ms',\
+          'VLBA_SRC049_sp.ms','VLBA_SRC005_sp.ms',\
+          'VLBA_SRC078_sp.ms','VLBA_SRC064_sp.ms',\
+          'VLBA_SRC199_sp.ms','VLBA_SRC111_sp.ms']
+
 phasecenter= ['J2000 12h36m59.3343s +62d18m32.5688s', 'J2000 12h36m48.3166s +62d18m32.5758s',\
               'J2000 12h37m46.6708s +62d17m38.5979s', 'J2000 12h37m13.871s +62d18m26.3019s',\
               'J2000 12h36m44.3877s +62d11m33.171s' , 'J2000 12h37m21.2533s +62d11m29.9646s',\
-              'J2000 12h36m23.5453s +62d16m42.747s' , 'J2000 12h37m01.104s +62d21m09.6222s']
+              'J2000 12h36m23.5453s +62d16m42.747s' , 'J2000 12h37m01.104s +62d21m09.6222s',\
+              'J2000 12h36m17.5562s +62d15m40.7679s', 'J2000 12h36m23.5454s +62d16m42.7437s',\
+              'J2000 12h36m22.5101s +62d06m53.8445s', 'J2000 12h36m46.3323s +62d14m04.692s']
 #msfile=['VLBA_SRC005_sp.ms']
 #phasecenter=['J2000 12h37m01.104s +62d21m09.6222s']
 chanaverage = 1 # channels
